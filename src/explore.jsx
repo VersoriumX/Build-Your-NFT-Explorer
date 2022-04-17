@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import NftCard from '../components/nftcard';
 import {fetchNFTs} from '../utils/fetchNFTs';

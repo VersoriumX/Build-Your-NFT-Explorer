@@ -1,5 +1,5 @@
 // Go to www.alchemy.com and create an account to grab your own api key!
-const apiKey = "demo";
+const apiKey = "7Prq2vKibFvsrR-JJTM10gZ4hn2Pn0Zm";
 const endpoint = `https://eth-mainnet.alchemyapi.io/v2/${apiKey}`;
 
 const getAddressNFTs = async (owner, contractAddress, retryAttempt) => {
@@ -15,7 +15,7 @@ const getAddressNFTs = async (owner, contractAddress, retryAttempt) => {
                 data = await fetch(`${endpoint}/getNFTs?owner=${owner}`).then(data => data.json())
             }
         } catch (e) {
-            getAddressNFTs(endpoint, owner, contractAddress, retryAttempt+1)
+          getAddressNFTs(owner, contractAddress, retryAttempt+1)
         }
 
         // NFT token IDs basically
@@ -24,12 +24,12 @@ const getAddressNFTs = async (owner, contractAddress, retryAttempt) => {
 }
 
 const getNFTsMetadata = async (NFTS) => {
-    const NFTsMetadata = await Promise.allSettled(NFTS.map(async (NFT) => {
+    return Promise.allSettled(NFTS.map(async (NFT) => {
         const metadata = await fetch(`${endpoint}/getNFTMetadata?contractAddress=${NFT.contract.address}&tokenId=${NFT.id.tokenId}`,).then(data => data.json())
         let imageUrl;
         console.log("metadata", metadata)
-        if (metadata.media[0].uri.gateway.length) {
-            imageUrl = metadata.media[0].uri.gateway
+       if (metadata.media[0].gateway) {
+            imageUrl = metadata.media[0].gateway
         } else {
             imageUrl = "https://via.placeholder.com/500"
         }
@@ -43,15 +43,15 @@ const getNFTsMetadata = async (NFTS) => {
             attributes: metadata.metadata.attributes
         }
     }))
-
-    return NFTsMetadata
 }
+
+// export {getNFTsMetadata}; 
 
 const fetchNFTs = async (owner, contractAddress, setNFTs) => {
     const data = await getAddressNFTs(owner, contractAddress)
     if (data.ownedNfts.length) {
         const NFTs = await getNFTsMetadata(data.ownedNfts)
-        let fullfilledNFTs = NFTs.filter(NFT => NFT.status == "fulfilled")
+        let fullfilledNFTs = NFTs.filter(NFT => NFT.status === "fulfilled")
         setNFTs(fullfilledNFTs)
     } else {
         setNFTs(null)
